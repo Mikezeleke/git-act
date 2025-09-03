@@ -1,0 +1,45 @@
+name: Push app to azure/ CI?CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+     
+      - name: Login to azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+ 
+      - name: set aks context
+        uses: azure/aks-set-context@v1
+        with:
+          resource-group: Mygroup
+          cluster-name: myaks
+
+      - name: login to acr
+        uses: azure/docker-login@v1
+        with:
+          login-server: myownnregistry@azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+         
+      - name: build and push docker image
+        run: | 
+          docker build -t myownnregistry.azurecr.io/myapp:v1 .
+          docker push myownnregistry.azurecr.io//myapp:v1 
+
+      - name: deploy to aks
+        run : |
+          kubectl set image deployment/myapp myapp=myownnregistry.azurecr.io/myapp:v1
