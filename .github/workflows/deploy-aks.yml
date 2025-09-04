@@ -1,4 +1,3 @@
-
 name: Azure OIDC Deployment
 
 on:
@@ -24,26 +23,22 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          auth-type: IDENTITY
+          auth-type: IDENTITY  # Optional, default is IDENTITY
 
-      - name: Azure CLI - Show current account
-        run: az account show
-
-      - name: set aks context
-        uses: azure/aks-set-context@v1
+      - name: Set AKS context
+        uses: azure/aks-set-context@v3
         with:
           resource-group: Mygroup
           cluster-name: myaks
-      
-      - name: login to acr
+
+      - name: Log in to ACR
         run: az acr login --name myownnregistry
-         
-         
-      - name: build and push docker image
+
+      - name: Build and push Docker image
         run: | 
           docker build -t myownnregistry.azurecr.io/myapp:v1 .
-          docker push myownnregistry.azurecr.io//myapp:v1 
+          docker push myownnregistry.azurecr.io/myapp:v1
 
-      - name: deploy to aks
-        run : |
+      - name: Deploy to AKS
+        run: |
           kubectl set image deployment/myapp myapp=myownnregistry.azurecr.io/myapp:v1
