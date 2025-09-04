@@ -35,11 +35,8 @@ jobs:
           cluster-name: myaks
       
       - name: login to acr
-        uses: azure/docker-login@v1
-        with:
-          login-server: myownnregistry@azurecr.io
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
+        run: az acr login --name myownnregistry
+         
          
       - name: build and push docker image
         run: | 
